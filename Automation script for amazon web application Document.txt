@@ -1,0 +1,151 @@
+package amazon;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+
+class Exam1 implements Runnable {
+	public void run() 
+	{
+		Hashtable<String, String> capsHashtable = new Hashtable<String, String>();
+		capsHashtable.put("browser", "chrome");
+		capsHashtable.put("browser_version", "91.0 beta");
+		capsHashtable.put("os", "Windows");
+		capsHashtable.put("os_version", "10");
+		capsHashtable.put("build", "browserstack-build-1");
+		capsHashtable.put("name", "Thread 1");
+		mainTestClass r1 = new mainTestClass();
+		r1.executeTest(capsHashtable);
+	}
+}
+
+
+class Exam2 implements Runnable {
+	public void run() 
+	{
+		Hashtable<String, String> capsHashtable = new Hashtable<String, String>();
+		capsHashtable.put("browser", "firefox");
+		capsHashtable.put("browser_version", "88.0");
+		capsHashtable.put("os", "Windows");
+		capsHashtable.put("os_version", "10");
+		capsHashtable.put("build", "browserstack-build-1");
+		capsHashtable.put("name", "Thread 2");
+		mainTestClass r2 = new mainTestClass();
+		r2.executeTest(capsHashtable);
+	}
+}
+
+public class mainTestClass<webelement, testngExecutor> 
+
+{
+	public static final String USERNAME = "shaikashraf_XW52HV";
+	public static final String AUTOMATE_KEY = "qqZL8SypHWdNpPaNyYLU";
+	public static final String URL = "https://" + USERNAME + ":" + AUTOMATE_KEY + "@hub-cloud.browserstack.com/wd/hub";
+	
+	public static void main(String[] args) throws Exception 
+	{
+		//Thread object1 = new Thread(new Exam1());
+		//object1.start();
+		Thread object2 = new Thread(new Exam2());
+	    object2.start();
+	}
+
+
+	public void executeTest(Hashtable<String, String> capsHashtable)
+	
+	{
+		String key;
+		DesiredCapabilities caps = new DesiredCapabilities();
+		caps.setCapability("browserstack.idleTimeout", "300");
+		// Iterate over the hash table and set the capabilities
+		Set<String> keys = capsHashtable.keySet();
+		Iterator<String> itr = keys.iterator();
+
+	
+		while (itr.hasNext()) 
+		
+		{
+			key = itr.next();
+			caps.setCapability(key, capsHashtable.get(key));
+		}
+		WebDriver driver;
+		
+		try 
+		{
+			driver = new RemoteWebDriver(new URL(URL), caps);
+			testngExecutor use = (testngExecutor)driver;
+
+			driver.get("https://www.amazon.in");//this will validte the correct website
+
+			System.out.println(driver.getTitle()); //this will the validate the current page title is correct 
+			System.out.println(driver.getCurrentUrl());//this will validate the current url.
+//
+
+			WebElement signin=driver.findElement(By.xpath("//*[@id='nav-signin-tooltip']"));
+			signin.click();
+			driver.findElement(By.id("ap_email")).sendKeys("sapr7124@gmail.com");
+			System.out.println("Email entered to sucessfully");
+
+			driver.findElement(By.id("continue")).click();
+			driver.findElement(By.id("ap_password")).sendKeys("Mohammedsha27@");
+			System.out.println("Password enter sucessfully");
+
+			driver.findElement(By.id("signInSubmit")).click();
+			System.out.println("sucessfully signed in amazon shopping website");
+
+			driver.findElement(By.id("twotabsearchtextbox")).sendKeys("samsung monitor");
+			driver.findElement(By.id("nav-search-submit-button")).click();
+			driver.findElement(By.xpath("//span[text()='Featured']/parent::span/parent::span")).click();
+			driver.findElement(By.xpath("//span[text()='Featured']/parent::span")).click();
+			WebElement latest=driver.findElement(By.xpath("//*[@id='s-result-sort-select_4']"));
+			latest.click();
+			driver.navigate().refresh();
+
+			WebElement product=driver.findElement(By.xpath("//span[contains(text(),'LF24G35TFWWXXL')]/parent::a"));
+			product.click();
+			driver.navigate().refresh();
+			System.out.println("scuessfully selected the product");
+
+			// Get handles of the windows
+			String mainWindowHandle = driver.getWindowHandle();
+			Set<String> allWindowHandles = driver.getWindowHandles();
+			Iterator<String> iterator = allWindowHandles.iterator();
+
+			// Here we will check if child window has other child windows and will fetch the
+			// heading of the child window
+			while (iterator.hasNext()) 
+			{
+				String ChildWindow = iterator.next();
+				if (!mainWindowHandle.equalsIgnoreCase(ChildWindow)) 
+				{
+					driver.switchTo().window(ChildWindow);
+
+				}
+			}
+
+			System.out.println(driver.getTitle());
+			driver.findElement(By.xpath("//*[@id='add-to-cart-button']")).click();
+			driver.findElement(By.id("hlb-view-cart-announce")).click();
+			System.out.println("Product is added to cart successfully");
+			driver.quit();
+		}
+
+
+		catch (MalformedURLException e) 
+		{	
+			e.printStackTrace();
+		}
+	}
+}
+
+
+
